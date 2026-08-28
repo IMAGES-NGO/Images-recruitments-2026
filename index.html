@@ -75,14 +75,16 @@
         z-index: 2;
         height: 22px;
         background: var(--ink);
-        background-image: repeating-linear-gradient(
-          to right,
-          var(--paper) 0px,
-          var(--paper) 10px,
-          transparent 10px,
-          transparent 24px
-        );
-        background-position: 7px center;
+        background-image: 
+          linear-gradient(to right, var(--ink) 14px, transparent 14px, transparent calc(100% - 14px), var(--ink) calc(100% - 14px)),
+          repeating-linear-gradient(
+            to right,
+            var(--paper) 0px,
+            var(--paper) 10px,
+            transparent 10px,
+            transparent 24px
+          );
+        background-position: left center, 14px center;
         overflow: hidden;
       }
 
@@ -92,6 +94,7 @@
         max-width: 720px;
         margin: 0 auto;
         padding: 30px 18px 90px;
+        perspective: 1200px;
       }
 
       .hud {
@@ -126,6 +129,13 @@
         letter-spacing: 4px;
         color: var(--ink);
         text-shadow: 2px 2px 0 rgba(163, 52, 31, 0.18);
+        min-height: 1.2em;
+      }
+      .masthead h1::after {
+        content: "|";
+        margin-left: 4px;
+        color: var(--stamp-red);
+        animation: blink 1s step-end infinite;
       }
       .masthead p {
         font-size: 15px;
@@ -209,6 +219,7 @@
       }
 
       input[type="text"],
+      select,
       textarea {
         width: 100%;
         background: var(--paper);
@@ -222,6 +233,7 @@
         border-radius: 0;
       }
       input[type="text"]:focus,
+      select:focus,
       textarea:focus {
         border-bottom-color: var(--stamp-red);
       }
@@ -247,6 +259,7 @@
         font-style: italic;
       }
       .field.invalid input,
+      .field.invalid select,
       .field.invalid textarea {
         border-color: var(--danger) !important;
       }
@@ -571,6 +584,7 @@
         }
 
         input[type="text"],
+        select,
         textarea {
           font-size: 16px; /* keep >=16px to stop iOS auto-zoom on focus */
           padding: 12px 4px;
@@ -637,6 +651,8 @@
 
       <!-- STEP 1 -->
       <form id="regForm" style="display: none">
+        <!-- Honeypot field to block dumb bots -->
+        <input type="text" id="website_url" name="website_url" style="position: absolute; left: -5000px; opacity: 0;" aria-hidden="true" tabindex="-1" autocomplete="off" />
         <div class="file-panel" id="screen-1">
           <div class="frame-tag">
             <span>Frame 01 — Subject Details</span>
@@ -662,8 +678,21 @@
 
           <div class="field" id="f-branch">
             <label>Branch <span class="req">*</span></label>
-            <input type="text" id="branch" placeholder="e.g. Electronics & Communication" autocomplete="off" />
-            <div class="field-error">Enter your branch.</div>
+            <select id="branch">
+              <option value="" disabled selected>Select your branch</option>
+              <option value="CSE">CSE</option>
+              <option value="CSE-AI">CSE-AI</option>
+              <option value="CSE-DS">CSE-DS</option>
+              <option value="Mathematics and Computing">Mathematics and Computing</option>
+              <option value="ECE">ECE</option>
+              <option value="ECE-VLSI">ECE-VLSI</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Metallurgical Engineering">Metallurgical Engineering</option>
+              <option value="Production Engineering">Production Engineering</option>
+            </select>
+            <div class="field-error">Select your branch.</div>
           </div>
 
           <div class="field" id="f-year">
@@ -796,13 +825,28 @@
       </div>
 
       <div class="footer-note">
-        IMAGES — Registered Society No. 4355 of 2013, Chandigarh Administration · est. 1991
+        IMAGES &mdash; Registered Society &#8470; 4355 of 2013, Chandigarh Administration &middot; Est. 1991
       </div>
     </div>
 
     <div class="filmstrip" id="filmBottom"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
     <script>
+      // ---------- TYPEWRITER ANIMATION ----------
+      gsap.registerPlugin(TextPlugin);
+
+      const titleWords = ["IMAGES", "Innovative", "Motivated", "Artistic", "Group", "of", "Engineering", "Students"];
+      const titleEl = document.querySelector(".masthead h1");
+      titleEl.textContent = "";
+
+      const titleTl = gsap.timeline({repeat: -1});
+      titleWords.forEach(word => {
+        titleTl.to(titleEl, {duration: 0.6, text: word, ease: "none"})
+               .to(titleEl, {duration: 0.4, text: "", ease: "none", delay: 1});
+      });
+
       // ---------- CONFIG ----------
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqFgghIqGm75yoX5Pop_yz7fbxS4LbvBi-hz3Qb6mrzM7-1orS4m5mITQzn60M-PuA/exec";
 
@@ -814,8 +858,29 @@
       const $ = (id) => document.getElementById(id);
 
       $("btnStart").addEventListener("click", () => {
-        $("screen-start").style.display = "none";
-        $("regForm").style.display = "block";
+        const startScreen = $("screen-start");
+        const formScreen = $("regForm");
+        
+        // Folder/pamphlet cover drops away
+        gsap.to(startScreen, {
+          duration: 0.3,
+          opacity: 0,
+          y: 20,
+          scale: 0.98,
+          ease: "power2.in",
+          onComplete: () => {
+            startScreen.style.display = "none";
+            gsap.set(startScreen, { opacity: 1, y: 0, scale: 1, rotationX: 0 }); // reset
+            
+            formScreen.style.display = "block";
+            
+            // Paper slides UP and OUT of the pamphlet sleeve
+            gsap.fromTo(formScreen, 
+              { clipPath: "inset(100% 0% 0% 0%)", y: 150, opacity: 0 },
+              { duration: 0.9, clipPath: "inset(0% 0% 0% 0%)", y: 0, opacity: 1, ease: "power3.out" }
+            );
+          }
+        });
       });
 
       document.querySelectorAll(".toggle-btn").forEach((btn) => {
@@ -864,9 +929,27 @@
 
       function validateStep1() {
         let ok = true;
-        if (!$("name").value.trim()) { showError("f-name"); ok = false; } else clearError("f-name");
-        if (!$("sid").value.trim()) { showError("f-sid"); ok = false; } else clearError("f-sid");
-        if (!$("branch").value.trim()) { showError("f-branch"); ok = false; } else clearError("f-branch");
+        
+        const nameVal = $("name").value.trim();
+        if (!nameVal || !/^[A-Za-z\s]+$/.test(nameVal)) {
+          $("f-name").querySelector(".field-error").textContent = nameVal ? "Name must only contain alphabets." : "We need a name for the file.";
+          showError("f-name");
+          ok = false;
+        } else clearError("f-name");
+
+        const sidVal = $("sid").value.trim();
+        if (!sidVal || !/^\d{8}$/.test(sidVal)) {
+          $("f-sid").querySelector(".field-error").textContent = sidVal ? "SID must be exactly 8 digits." : "SID is required.";
+          showError("f-sid");
+          ok = false;
+        } else clearError("f-sid");
+
+        if (!$("branch").value) {
+          $("f-branch").querySelector(".field-error").textContent = "Select your branch.";
+          showError("f-branch");
+          ok = false;
+        } else clearError("f-branch");
+
         if (!selectedYear) { showError("f-year"); ok = false; } else clearError("f-year");
         return ok;
       }
@@ -885,30 +968,61 @@
         return ok;
       }
 
+      function flipScreens(outScreen, inScreen, isForward) {
+        // Hinge points and rotation angles for pamphlet flip effect
+        const outHinge = isForward ? "left center" : "right center";
+        const inHinge = isForward ? "right center" : "left center";
+        const outRotate = isForward ? -90 : 90;
+        const inRotate = isForward ? 90 : -90;
+
+        gsap.to(outScreen, {
+          duration: 0.35,
+          rotationY: outRotate,
+          transformOrigin: outHinge,
+          opacity: 0,
+          ease: "power2.in",
+          onComplete: () => {
+            outScreen.style.display = "none";
+            gsap.set(outScreen, { rotationY: 0, opacity: 1 }); // reset
+            
+            inScreen.style.display = "block";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+
+            gsap.fromTo(inScreen,
+              { rotationY: inRotate, transformOrigin: inHinge, opacity: 0 },
+              { duration: 0.45, rotationY: 0, opacity: 1, ease: "back.out(1.2)" }
+            );
+          }
+        });
+      }
+
       $("toStep2").addEventListener("click", () => {
         if (!validateStep1()) return;
-        $("screen-1").style.display = "none";
-        $("screen-2").style.display = "block";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        flipScreens($("screen-1"), $("screen-2"), true);
       });
       $("back2").addEventListener("click", () => {
-        $("screen-2").style.display = "none";
-        $("screen-1").style.display = "block";
+        flipScreens($("screen-2"), $("screen-1"), false);
       });
       $("toStep3").addEventListener("click", () => {
         if (!validateStep2()) return;
-        $("screen-2").style.display = "none";
-        $("screen-3").style.display = "block";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        flipScreens($("screen-2"), $("screen-3"), true);
       });
       $("back3").addEventListener("click", () => {
-        $("screen-3").style.display = "none";
-        $("screen-2").style.display = "block";
+        flipScreens($("screen-3"), $("screen-2"), false);
       });
 
       // ---------- submit ----------
       document.getElementById("regForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+        
+        // Honeypot check: If bot filled this hidden field, silently reject
+        if ($("website_url").value) {
+          document.getElementById("regForm").style.display = "none";
+          $("screen-success").style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+
         if (!validateStep3()) return;
 
         const submitBtn = $("submitBtn");
