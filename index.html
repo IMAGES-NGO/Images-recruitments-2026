@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMAGES — Member Intake File</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #ece4d3;
+        --paper-dark: #e1d7c0;
+        --ink: #2a251d;
+        --ink-soft: #5a5142;
+        --stamp-red: #a3341f;
+        --carbon-blue: #2f4a5c;
+        --gold: #a3813f;
+        --line: rgba(42, 37, 29, 0.28);
+        --danger: #a3341f;
+        --display: "Special Elite", monospace;
+        --body-font: "Courier Prime", monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--body-font);
+        font-size: 16px;
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .toggle-btn,
+      .polaroid,
+      .chip,
+      .btn {
+        touch-action: manipulation;
+      }
+
+      /* ---------- paper texture ---------- */
+      .grain {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background-image:
+          radial-gradient(rgba(42, 37, 29, 0.05) 1px, transparent 1px);
+        background-size: 3px 3px;
+      }
+      .paper-shade {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(1200px 700px at 15% -10%, rgba(163, 129, 63, 0.14), transparent 60%),
+          radial-gradient(900px 600px at 100% 110%, rgba(47, 74, 92, 0.1), transparent 55%);
+      }
+
+      /* ---------- filmstrip signature ---------- */
+      .filmstrip {
+        position: relative;
+        z-index: 2;
+        height: 22px;
+        background: var(--ink);
+        background-image: repeating-linear-gradient(
+          to right,
+          var(--paper) 0px,
+          var(--paper) 10px,
+          transparent 10px,
+          transparent 24px
+        );
+        background-position: 7px center;
+        overflow: hidden;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 2;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 30px 18px 90px;
+      }
+
+      .hud {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        font-family: var(--display);
+        font-size: 10px;
+        color: var(--ink-soft);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        border-bottom: 1px dashed var(--line);
+        padding-bottom: 10px;
+      }
+
+      .masthead {
+        text-align: center;
+        margin: 6px 0 28px;
+      }
+      .masthead .est {
+        font-family: var(--display);
+        font-size: 11px;
+        letter-spacing: 3px;
+        color: var(--carbon-blue);
+        margin-bottom: 10px;
+      }
+      .masthead h1 {
+        font-family: var(--display);
+        font-size: clamp(34px, 9vw, 58px);
+        margin: 0;
+        letter-spacing: 4px;
+        color: var(--ink);
+        text-shadow: 2px 2px 0 rgba(163, 52, 31, 0.18);
+      }
+      .masthead p {
+        font-size: 15px;
+        color: var(--ink-soft);
+        margin: 10px auto 0;
+        max-width: 480px;
+        line-height: 1.55;
+      }
+
+      /* ---------- dossier panel ---------- */
+      .file-panel {
+        background: var(--paper-dark);
+        border: 1px solid var(--line);
+        box-shadow:
+          0 1px 0 rgba(255, 255, 255, 0.4) inset,
+          6px 6px 0 rgba(42, 37, 29, 0.08),
+          0 0 0 1px rgba(42, 37, 29, 0.05);
+        padding: 30px 26px;
+        position: relative;
+      }
+      .file-panel::before {
+        /* punch holes, like a physical file */
+        content: "";
+        position: absolute;
+        left: -1px;
+        top: 22px;
+        bottom: 22px;
+        width: 1px;
+        border-left: 2px dotted rgba(42, 37, 29, 0.2);
+      }
+
+      .frame-tag {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--display);
+        font-size: 12px;
+        color: var(--stamp-red);
+        letter-spacing: 1.5px;
+        margin-bottom: 18px;
+        text-transform: uppercase;
+      }
+      .frame-tag .count {
+        color: var(--ink-soft);
+        font-size: 11px;
+        letter-spacing: 1px;
+      }
+
+      .reel-row {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 24px;
+      }
+      .reel-seg {
+        flex: 1;
+        height: 8px;
+        background: rgba(42, 37, 29, 0.12);
+        position: relative;
+      }
+      .reel-seg.filled {
+        background: var(--carbon-blue);
+      }
+
+      label {
+        display: block;
+        font-family: var(--display);
+        font-size: 12px;
+        color: var(--ink);
+        margin: 20px 0 8px;
+        letter-spacing: 0.4px;
+        line-height: 1.5;
+      }
+      label .req {
+        color: var(--stamp-red);
+      }
+      label .opt {
+        color: var(--ink-soft);
+        font-size: 11px;
+        font-family: var(--body-font);
+        font-style: italic;
+      }
+
+      input[type="text"],
+      textarea {
+        width: 100%;
+        background: var(--paper);
+        border: none;
+        border-bottom: 2px solid var(--ink-soft);
+        color: var(--ink);
+        font-family: var(--body-font);
+        font-size: 16px;
+        padding: 10px 4px;
+        outline: none;
+        border-radius: 0;
+      }
+      input[type="text"]:focus,
+      textarea:focus {
+        border-bottom-color: var(--stamp-red);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+        border: 1px solid var(--ink-soft);
+        padding: 12px;
+      }
+      textarea:focus {
+        border-color: var(--stamp-red);
+      }
+      ::placeholder {
+        color: #a39a86;
+        font-style: italic;
+      }
+
+      .field-error {
+        display: none;
+        color: var(--danger);
+        font-size: 13px;
+        margin-top: 6px;
+        font-style: italic;
+      }
+      .field.invalid input,
+      .field.invalid textarea {
+        border-color: var(--danger) !important;
+      }
+      .field.invalid .field-error {
+        display: block;
+      }
+      @keyframes nudge {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-4px);
+        }
+        75% {
+          transform: translateX(4px);
+        }
+      }
+      .field.invalid {
+        animation: nudge 0.2s;
+      }
+
+      /* toggle row (Year) */
+      .toggle-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .toggle-btn {
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+        padding: 11px 8px;
+        cursor: pointer;
+        border: 1px solid var(--ink-soft);
+        background: var(--paper);
+        color: var(--ink-soft);
+        font-family: var(--display);
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        transition: all 0.15s;
+      }
+      .toggle-btn.active {
+        background: var(--carbon-blue);
+        color: var(--paper);
+        border-color: var(--carbon-blue);
+      }
+
+      /* interest / skill chips — polaroid style for interests, plain chip for skills */
+      .polaroid-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 14px;
+        margin-top: 8px;
+      }
+      .polaroid {
+        cursor: pointer;
+        background: #fbf8f0;
+        border: 1px solid rgba(42, 37, 29, 0.25);
+        padding: 10px 10px 12px;
+        box-shadow: 3px 4px 0 rgba(42, 37, 29, 0.1);
+        transition: all 0.15s;
+        transform: rotate(var(--r, 0deg));
+      }
+      .polaroid:nth-child(2n) {
+        --r: 1deg;
+      }
+      .polaroid:nth-child(3n) {
+        --r: -1deg;
+      }
+      .polaroid .frame {
+        height: 62px;
+        background: linear-gradient(135deg, #d8cfb8, #c3b898);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 10px;
+        filter: grayscale(0.5) opacity(0.8);
+      }
+      .polaroid .cap {
+        font-family: var(--display);
+        font-size: 10px;
+        text-align: center;
+        letter-spacing: 0.3px;
+        color: var(--ink-soft);
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+      .polaroid.active {
+        border-color: var(--stamp-red);
+        box-shadow: 3px 4px 0 rgba(163, 52, 31, 0.25);
+        transform: rotate(0deg) scale(1.02);
+      }
+      .polaroid.active .frame {
+        filter: none;
+      }
+      .polaroid.active .cap {
+        color: var(--stamp-red);
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .chip {
+        cursor: pointer;
+        padding: 8px 14px;
+        border: 1px solid var(--ink-soft);
+        background: var(--paper);
+        color: var(--ink-soft);
+        font-size: 14px;
+        transition: all 0.15s;
+      }
+      .chip.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .other-input {
+        margin-top: 12px;
+        display: none;
+      }
+      .other-input.show {
+        display: block;
+      }
+
+      .big-question {
+        border: 1px solid var(--stamp-red);
+        background: rgba(163, 52, 31, 0.05);
+        padding: 16px;
+        margin-top: 6px;
+      }
+      .big-question .q-label {
+        font-family: var(--display);
+        font-size: 10px;
+        color: var(--stamp-red);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .big-question p.q-text {
+        font-family: var(--display);
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 14px;
+        color: var(--ink);
+      }
+
+      /* buttons */
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+      }
+      .btn {
+        font-family: var(--display);
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 14px 18px;
+        cursor: pointer;
+        border: 1px solid var(--ink);
+        color: var(--paper);
+        background: var(--ink);
+        transition: all 0.12s;
+      }
+      .btn:hover {
+        background: var(--stamp-red);
+        border-color: var(--stamp-red);
+      }
+      .btn:active {
+        transform: translateY(1px);
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--ink-soft);
+        border-color: var(--ink-soft);
+      }
+      .btn.ghost:hover {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--ink);
+      }
+      .btn.full {
+        width: 100%;
+        text-align: center;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .start-screen {
+        text-align: center;
+      }
+      .folder-tab {
+        display: inline-block;
+        background: var(--stamp-red);
+        color: var(--paper);
+        font-family: var(--display);
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        padding: 6px 14px;
+        margin-bottom: 16px;
+        transform: rotate(-2deg);
+      }
+      .start-screen p.lead {
+        font-size: 16px;
+        line-height: 1.7;
+        color: var(--ink-soft);
+        text-align: left;
+      }
+      .facts {
+        text-align: left;
+        margin: 18px 0 8px;
+        font-size: 14px;
+        color: var(--ink-soft);
+        line-height: 1.8;
+      }
+      .facts b {
+        color: var(--ink);
+      }
+
+      .footer-note {
+        text-align: center;
+        color: var(--ink-soft);
+        font-size: 13px;
+        margin-top: 24px;
+        letter-spacing: 0.3px;
+      }
+
+      /* success screen */
+      .success-box {
+        text-align: center;
+      }
+      .stamp {
+        display: inline-block;
+        border: 4px double var(--stamp-red);
+        color: var(--stamp-red);
+        font-family: var(--display);
+        font-size: 20px;
+        letter-spacing: 3px;
+        padding: 10px 22px;
+        transform: rotate(-4deg);
+        margin: 10px 0 18px;
+      }
+      .member-id {
+        font-family: var(--display);
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--paper);
+        border: 1px dashed var(--ink-soft);
+        padding: 12px;
+        margin: 16px 0;
+        letter-spacing: 1.5px;
+      }
+
+      @media (max-width: 600px) {
+        .wrap {
+          padding: 18px 12px 70px;
+        }
+        .file-panel {
+          padding: 20px 14px;
+          box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.4) inset,
+            3px 3px 0 rgba(42, 37, 29, 0.08),
+            0 0 0 1px rgba(42, 37, 29, 0.05);
+        }
+        .file-panel::before {
+          display: none;
+        }
+        .masthead h1 {
+          letter-spacing: 1px;
+        }
+        .masthead p {
+          font-size: 14px;
+        }
+        .hud {
+          font-size: 8px;
+          gap: 8px;
+        }
+        .frame-tag {
+          font-size: 11px;
+        }
+
+        /* stack primary actions full-width and put Next above Back
+           so the thumb-reachable bottom button is the one people want */
+        .btn-row {
+          flex-direction: column-reverse;
+          gap: 10px;
+        }
+        .btn {
+          padding: 15px 16px;
+          font-size: 12px;
+        }
+
+        .toggle-btn {
+          min-width: calc(50% - 4px);
+          padding: 13px 8px;
+        }
+
+        .polaroid-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        .polaroid {
+          padding: 8px 8px 10px;
+        }
+        .polaroid .frame {
+          height: 50px;
+          font-size: 22px;
+        }
+
+        .chip {
+          padding: 10px 14px;
+          font-size: 13px;
+        }
+
+        input[type="text"],
+        textarea {
+          font-size: 16px; /* keep >=16px to stop iOS auto-zoom on focus */
+          padding: 12px 4px;
+        }
+        textarea {
+          padding: 12px;
+        }
+
+        .stamp {
+          font-size: 16px;
+          padding: 8px 16px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .polaroid-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .masthead h1 {
+          font-size: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grain"></div>
+    <div class="paper-shade"></div>
+    <div class="filmstrip" id="filmTop"></div>
+
+    <div class="wrap">
+      <div class="hud">
+        <span>IMAGES.SOC / INTAKE-FORM</span>
+        <span>REG. NO. 4355 OF 2013</span>
+      </div>
+
+      <div class="masthead">
+        <div class="est">EST. 1991 · SELF-GOVERNED · PEC</div>
+        <h1>IMAGES</h1>
+        <p>
+          Member intake file — orientation season 2026. No parent body, no
+          mandate from above. Just a constitution, an elected body, and
+          members who show up.
+        </p>
+      </div>
+
+      <!-- START SCREEN -->
+      <div class="file-panel start-screen" id="screen-start">
+        <div class="folder-tab">CASE FILE — UNOPENED</div>
+        <p class="lead">
+          IMAGES has run its own General Body Meetings, its own recruitment,
+          and its own community work since before most of us were born — all
+          without being an official club of the College. That hasn't stopped
+          us. This form is how you get added to the file.
+        </p>
+        <div class="facts">
+          <div><b>Founded</b> — 1991</div>
+          <div><b>Structure</b> — 18-clause constitution, elected Exec Body</div>
+          <div><b>Focus</b> — personality development, community service, alumni mentorship</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn full" id="btnStart">OPEN CASE FILE ▸</button>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <form id="regForm" style="display: none">
+        <div class="file-panel" id="screen-1">
+          <div class="frame-tag">
+            <span>Frame 01 — Subject Details</span>
+            <span class="count">1 / 3</span>
+          </div>
+          <div class="reel-row">
+            <div class="reel-seg filled"></div>
+            <div class="reel-seg"></div>
+            <div class="reel-seg"></div>
+          </div>
+
+          <div class="field" id="f-name">
+            <label>Full Name <span class="req">*</span></label>
+            <input type="text" id="name" placeholder="e.g. Ritika Chawla" autocomplete="off" />
+            <div class="field-error">We need a name for the file.</div>
+          </div>
+
+          <div class="field" id="f-sid">
+            <label>Student ID (SID) <span class="req">*</span></label>
+            <input type="text" id="sid" placeholder="e.g. 22103045" autocomplete="off" />
+            <div class="field-error">SID is required.</div>
+          </div>
+
+          <div class="field" id="f-branch">
+            <label>Branch <span class="req">*</span></label>
+            <input type="text" id="branch" placeholder="e.g. Electronics & Communication" autocomplete="off" />
+            <div class="field-error">Enter your branch.</div>
+          </div>
+
+          <div class="field" id="f-year">
+            <label>Year <span class="req">*</span></label>
+            <div class="toggle-row">
+              <div class="toggle-btn" data-year="First">First Year</div>
+              <div class="toggle-btn" data-year="Second">Second Year</div>
+              <div class="toggle-btn" data-year="Third/Fourth">Third/Fourth Year</div>
+            </div>
+            <div class="field-error">Select your year.</div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn full" id="toStep2">NEXT FRAME ▸</button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="file-panel" id="screen-2" style="display: none">
+          <div class="frame-tag">
+            <span>Frame 02 — Areas of Exposure</span>
+            <span class="count">2 / 3</span>
+          </div>
+          <div class="reel-row">
+            <div class="reel-seg filled"></div>
+            <div class="reel-seg filled"></div>
+            <div class="reel-seg"></div>
+          </div>
+
+          <div class="field" id="f-interest">
+            <label>Where do you want to get involved? <span class="opt">(pick as many as you like)</span> <span class="req">*</span></label>
+            <div class="polaroid-grid">
+              <div class="polaroid" data-interest="Personality Development">
+                <div class="frame">🗣️</div>
+                <div class="cap">Personality<br />Development</div>
+              </div>
+              <div class="polaroid" data-interest="Community Service">
+                <div class="frame">🤝</div>
+                <div class="cap">Community<br />Service</div>
+              </div>
+              <div class="polaroid" data-interest="Content & Design">
+                <div class="frame">🎨</div>
+                <div class="cap">Content &amp;<br />Design</div>
+              </div>
+              <div class="polaroid" data-interest="Events & Fundraising">
+                <div class="frame">📋</div>
+                <div class="cap">Events &amp;<br />Fundraising</div>
+              </div>
+              <div class="polaroid" data-interest="Web Development">
+                <div class="frame">💻</div>
+                <div class="cap">Web<br />Development</div>
+              </div>
+              <div class="polaroid" data-interest="Alumni & Mentorship">
+                <div class="frame">🎓</div>
+                <div class="cap">Alumni &amp;<br />Mentorship</div>
+              </div>
+              <div class="polaroid" data-interest="Other">
+                <div class="frame">✎</div>
+                <div class="cap">Something<br />Else</div>
+              </div>
+            </div>
+            <div class="field-error">Pick at least one area.</div>
+            <div class="other-input" id="otherWrap">
+              <input type="text" id="interestOther" placeholder="Tell us what that is" />
+            </div>
+          </div>
+
+          <label>What do you bring to the table? <span class="opt">(optional)</span></label>
+          <div class="chip-row" id="skillChips">
+            <div class="chip" data-skill="Public Speaking">Public Speaking</div>
+            <div class="chip" data-skill="Anchoring / Hosting">Anchoring / Hosting</div>
+            <div class="chip" data-skill="Writing">Writing</div>
+            <div class="chip" data-skill="Photography / Videography">Photography / Videography</div>
+            <div class="chip" data-skill="Graphic Design">Graphic Design</div>
+            <div class="chip" data-skill="Coding">Coding</div>
+            <div class="chip" data-skill="Organising Events">Organising Events</div>
+            <div class="chip" data-skill="Sponsorship / Outreach">Sponsorship / Outreach</div>
+            <div class="chip" data-skill="Social Media">Social Media</div>
+            <div class="chip" data-skill="Leadership">Leadership</div>
+          </div>
+
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="back2">◂ BACK</button>
+            <button type="button" class="btn full" id="toStep3">NEXT FRAME ▸</button>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="file-panel" id="screen-3" style="display: none">
+          <div class="frame-tag">
+            <span>Frame 03 — Developing the Picture</span>
+            <span class="count">3 / 3</span>
+          </div>
+          <div class="reel-row">
+            <div class="reel-seg filled"></div>
+            <div class="reel-seg filled"></div>
+            <div class="reel-seg filled"></div>
+          </div>
+
+          <div class="field" id="f-poster">
+            <div class="big-question">
+              <div class="q-label">The one big question</div>
+              <p class="q-text">
+                If you were allowed to put one poster anywhere on campus,
+                what would it say?
+              </p>
+              <textarea id="poster" placeholder="Say whatever you'd actually put on it."></textarea>
+            </div>
+            <div class="field-error">Give us something — one line is enough.</div>
+          </div>
+
+          <label>Anything else you want on file? <span class="opt">(optional)</span></label>
+          <input type="text" id="extra" placeholder="A one-liner, a question, whatever." />
+
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="back3">◂ BACK</button>
+            <button type="submit" class="btn full" id="submitBtn">CLOSE THE FILE ✔</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- SUCCESS SCREEN -->
+      <div class="file-panel success-box" id="screen-success" style="display: none">
+        <div class="stamp">ADMITTED</div>
+        <p style="font-size: 15px; color: var(--ink-soft); line-height: 1.6">
+          You're on the file. Get ready for the interviews.
+        </p>
+        <div class="member-id" id="memberIdOut"></div>
+        <button class="btn full" id="restartBtn" type="button">FILE ANOTHER MEMBER</button>
+      </div>
+
+      <div class="footer-note">
+        IMAGES — Registered Society No. 4355 of 2013, Chandigarh Administration · est. 1991
+      </div>
+    </div>
+
+    <div class="filmstrip" id="filmBottom"></div>
+
+    <script>
+      // ---------- CONFIG ----------
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqFgghIqGm75yoX5Pop_yz7fbxS4LbvBi-hz3Qb6mrzM7-1orS4m5mITQzn60M-PuA/exec";
+
+      // ---------- state ----------
+      let selectedYear = null;
+      const selectedInterests = new Set();
+      const selectedSkills = new Set();
+
+      const $ = (id) => document.getElementById(id);
+
+      $("btnStart").addEventListener("click", () => {
+        $("screen-start").style.display = "none";
+        $("regForm").style.display = "block";
+      });
+
+      document.querySelectorAll(".toggle-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".toggle-btn").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          selectedYear = btn.dataset.year;
+          clearError("f-year");
+        });
+      });
+
+      document.querySelectorAll(".polaroid").forEach((card) => {
+        card.addEventListener("click", () => {
+          const val = card.dataset.interest;
+          if (selectedInterests.has(val)) {
+            selectedInterests.delete(val);
+            card.classList.remove("active");
+          } else {
+            selectedInterests.add(val);
+            card.classList.add("active");
+          }
+          clearError("f-interest");
+          $("otherWrap").classList.toggle("show", selectedInterests.has("Other"));
+        });
+      });
+
+      document.querySelectorAll(".chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const val = chip.dataset.skill;
+          if (selectedSkills.has(val)) {
+            selectedSkills.delete(val);
+            chip.classList.remove("active");
+          } else {
+            selectedSkills.add(val);
+            chip.classList.add("active");
+          }
+        });
+      });
+
+      function showError(fieldId) {
+        $(fieldId).classList.add("invalid");
+      }
+      function clearError(fieldId) {
+        $(fieldId).classList.remove("invalid");
+      }
+
+      function validateStep1() {
+        let ok = true;
+        if (!$("name").value.trim()) { showError("f-name"); ok = false; } else clearError("f-name");
+        if (!$("sid").value.trim()) { showError("f-sid"); ok = false; } else clearError("f-sid");
+        if (!$("branch").value.trim()) { showError("f-branch"); ok = false; } else clearError("f-branch");
+        if (!selectedYear) { showError("f-year"); ok = false; } else clearError("f-year");
+        return ok;
+      }
+      function validateStep2() {
+        let ok = true;
+        if (selectedInterests.size === 0) {
+          showError("f-interest"); ok = false;
+        } else if (selectedInterests.has("Other") && !$("interestOther").value.trim()) {
+          showError("f-interest"); ok = false;
+        } else clearError("f-interest");
+        return ok;
+      }
+      function validateStep3() {
+        let ok = true;
+        if (!$("poster").value.trim()) { showError("f-poster"); ok = false; } else clearError("f-poster");
+        return ok;
+      }
+
+      $("toStep2").addEventListener("click", () => {
+        if (!validateStep1()) return;
+        $("screen-1").style.display = "none";
+        $("screen-2").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      $("back2").addEventListener("click", () => {
+        $("screen-2").style.display = "none";
+        $("screen-1").style.display = "block";
+      });
+      $("toStep3").addEventListener("click", () => {
+        if (!validateStep2()) return;
+        $("screen-2").style.display = "none";
+        $("screen-3").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      $("back3").addEventListener("click", () => {
+        $("screen-3").style.display = "none";
+        $("screen-2").style.display = "block";
+      });
+
+      // ---------- submit ----------
+      document.getElementById("regForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!validateStep3()) return;
+
+        const submitBtn = $("submitBtn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "FILING...";
+
+        const record = {
+          name: $("name").value.trim(),
+          sid: $("sid").value.trim(),
+          branch: $("branch").value.trim(),
+          year: selectedYear,
+          interests: Array.from(selectedInterests).join(", "),
+          interestOther: selectedInterests.has("Other") ? $("interestOther").value.trim() : "",
+          skills: Array.from(selectedSkills).join(", "),
+          posterAnswer: $("poster").value.trim(),
+          extra: $("extra").value.trim(),
+          timestamp: new Date().toISOString(),
+        };
+
+        try {
+          if (!SCRIPT_URL || SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
+            throw new Error("SCRIPT_URL not configured yet");
+          }
+
+          // "no-cors" + text/plain avoids a CORS preflight that Apps Script
+          // web apps don't handle. We can't read the response back, so we
+          // treat a request that didn't throw as a success.
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(record),
+          });
+
+          const memberId = "IMG-" + Date.now().toString(36).toUpperCase().slice(-6);
+          $("memberIdOut").textContent = "MEMBER FILE NO. " + memberId;
+          document.getElementById("regForm").style.display = "none";
+          $("screen-success").style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (err) {
+          console.error("Failed to save response:", err);
+          alert(
+            "Something went wrong filing your entry. Please try again — if it keeps failing, screenshot this and send it to an exec member."
+          );
+          submitBtn.disabled = false;
+          submitBtn.textContent = "CLOSE THE FILE ✔";
+        }
+      });
+
+      $("restartBtn").addEventListener("click", () => {
+        document.getElementById("regForm").reset();
+        selectedYear = null;
+        selectedInterests.clear();
+        selectedSkills.clear();
+        document.querySelectorAll(".toggle-btn, .polaroid, .chip").forEach((el) => el.classList.remove("active"));
+        $("otherWrap").classList.remove("show");
+        $("screen-success").style.display = "none";
+        $("screen-1").style.display = "block";
+        $("screen-2").style.display = "none";
+        $("screen-3").style.display = "none";
+        $("regForm").style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>
