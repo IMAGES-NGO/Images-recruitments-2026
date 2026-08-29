@@ -219,6 +219,7 @@
       }
 
       input[type="text"],
+      input[type="tel"],
       select,
       textarea {
         width: 100%;
@@ -233,6 +234,7 @@
         border-radius: 0;
       }
       input[type="text"]:focus,
+      input[type="tel"]:focus,
       select:focus,
       textarea:focus {
         border-bottom-color: var(--stamp-red);
@@ -584,6 +586,7 @@
         }
 
         input[type="text"],
+        input[type="tel"],
         select,
         textarea {
           font-size: 16px; /* keep >=16px to stop iOS auto-zoom on focus */
@@ -673,6 +676,12 @@
             <label>Student ID (SID) <span class="req">*</span></label>
             <input type="text" id="sid" placeholder="e.g. 22103045" autocomplete="off" />
             <div class="field-error">SID is required.</div>
+          </div>
+
+          <div class="field" id="f-phone">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" id="phone" placeholder="e.g. 9876543210" autocomplete="off" inputmode="numeric" />
+            <div class="field-error">Enter a valid 10-digit (whatsapp) phone number.</div>
           </div>
 
           <div class="field" id="f-branch">
@@ -944,6 +953,13 @@
           ok = false;
         } else clearError("f-sid");
 
+        const phoneVal = $("phone").value.trim();
+        if (!phoneVal || !/^\d{10}$/.test(phoneVal)) {
+          $("f-phone").querySelector(".field-error").textContent = phoneVal ? "Phone number must be exactly 10 digits." : "Phone number is required.";
+          showError("f-phone");
+          ok = false;
+        } else clearError("f-phone");
+
         if (!$("branch").value) {
           $("f-branch").querySelector(".field-error").textContent = "Select your branch.";
           showError("f-branch");
@@ -1032,6 +1048,7 @@
         const record = {
           name: $("name").value.trim(),
           sid: $("sid").value.trim(),
+          phone: $("phone").value.trim(),
           branch: $("branch").value.trim(),
           year: selectedYear,
           interests: Array.from(selectedInterests).join(", "),
